@@ -1,0 +1,63 @@
+log:
+  stdout_log_level: INFO
+
+!include ../shared_config.yaml
+
+apps:
+  - name: job-description-extractor_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE, sam/}
+      supports_streaming: true
+      agent_name: "JobDescriptionExtractor"
+      display_name: "Job Description Extractor"
+      model: *general_model
+
+      instruction: |
+        You extract structured data from a job description.
+
+        Return ONLY valid JSON in this exact shape:
+        {
+          "techSkills": [],
+          "educations": [],
+          "certifications": []
+        }
+
+        Rules:
+        - Use arrays of strings only.
+        - Do not add extra keys.
+        - If a field is missing, return an empty array.
+
+      session_service:
+        type: "memory"
+      artifact_service: *default_artifact_service
+
+      agent_card:
+        title: "Job Description Extractor"
+        description: >
+          Job Description Extractor - Parses a job description and returns
+          structured JSON with technical skills, education, and certifications.
+          Use this agent when the user asks to "extract requirements from a job
+          description", "parse a job description into structured data", or
+          needs a JSON summary of role qualifications.
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text"]
+        skills:
+          - id: "job_description_extraction"
+            name: "Job Description Extraction"
+            description: "Extracts tech skills, education, and certifications from job descriptions"
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["OrchestratorAgent"]
+        request_timeout_seconds: 60

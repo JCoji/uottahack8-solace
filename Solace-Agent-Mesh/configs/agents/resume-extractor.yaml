@@ -1,0 +1,64 @@
+log:
+  stdout_log_level: INFO
+
+!include ../shared_config.yaml
+
+apps:
+  - name: resume-extractor_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE, sam/}
+      supports_streaming: true
+      agent_name: "ResumeExtractor"
+      display_name: "Resume Extractor"
+      model: *general_model
+
+      instruction: |
+        You extract structured data from a resume.
+
+        Return ONLY valid JSON in this exact shape:
+        {
+          "techSkills": [],
+          "educations": [],
+          "certifications": []
+        }
+
+        Rules:
+        - Use arrays of strings only.
+        - Do not add extra keys.
+        - If a field is missing, return an empty array.
+        - Do not include any special formatting or markdown.
+        - Do not include any explanations, only return the JSON.
+
+      session_service:
+        type: "memory"
+      artifact_service: *default_artifact_service
+
+      agent_card:
+        title: "Resume Extractor"
+        description: >
+          Resume Extractor - Parses a resume and returns structured JSON with
+          technical skills, education, and certifications. Use this agent when
+          the user asks to "extract skills from a resume", "parse a resume into
+          structured data", or needs a JSON summary of resume qualifications.
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text"]
+        skills:
+          - id: "resume_extraction"
+            name: "Resume Extraction"
+            description: "Extracts tech skills, education, and certifications from resumes"
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["OrchestratorAgent"]
+        request_timeout_seconds: 60
