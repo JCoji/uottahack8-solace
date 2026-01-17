@@ -32,6 +32,8 @@ apps:
         - Use arrays of strings only.
         - Do not add extra keys.
         - If a field is missing, return an empty array.
+        - Do not include any special formatting or markdown.
+        - Do not include any explanations, only return the JSON.
 
       session_service:
         type: "memory"
