@@ -85,14 +85,18 @@
                 document.getElementById('noDataState').classList.add('hidden');
                 document.getElementById('dataDisplayState').classList.remove('hidden');
 
-                document.getElementById('previewCompany').textContent = company;
-                document.getElementById('comparisonDetails').textContent = jobDescription.length > 250 
-                    ? jobDescription.substring(0, 250) + '...' 
-                    : jobDescription;
+                // when ready ue these to display results
+                // document.getElementById('scoreResult').textContent = company;
+                // document.getElementById('softResult').textContent = jobDescription;
+                // document.getElementById('hardResult').textContent = extractedResumeText;
+
+                // document.getElementById('softResult').textContent = jobDescription.length > 250 
+                //     ? jobDescription.substring(0, 250) + '...' 
+                //     : jobDescription;
 
                 // Ensure text is set and visible
-                const previewEl = document.getElementById('comparisonSummary');
-                previewEl.textContent = extractedResumeText || "No text could be extracted.";
+                // const previewEl = document.getElementById('comparisonSummary');
+                // previewEl.textContent = extractedResumeText || "No text could be extracted.";
                 
                 btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Results Loaded';
                 setTimeout(() => {
