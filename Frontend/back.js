@@ -18,6 +18,20 @@ const submitBtn = document.getElementById('submitBtn');
 
 let isExtracting = false;
 
+// New function to fetch data from Node.js server and log it
+async function fetchAnalysisData() {
+    try {
+        console.log('%c[Fetching Analysis Data]', 'color: #2563eb; font-weight: bold;');
+        const response = await fetch('http://localhost:3000/api/analyze');
+        const data = await response.json();
+        console.log('%c[API Response Data]', 'color: #10b981; font-weight: bold;', data);
+        return data;
+    } catch (error) {
+        console.error('%c[API Error]', 'color: #ef4444; font-weight: bold;', error);
+        throw error;
+    }
+}
+
 resumeInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (!file) {
@@ -104,4 +118,14 @@ document.getElementById('jobForm').addEventListener('submit', function(e) {
                     btn.disabled = false;
                 }, 2000);
             }, 600);
+        
+        fetchAnalysisData().then(data => {
+            document.getElementById('scoreResult').textContent = data.score;
+            document.getElementById('softResult').innerHTML = data.softSkillFeedback.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('hardResult').innerHTML = data.hardSkillFeedback.map(item => `<li>${item}</li>`).join('');
+        }).catch(error => {
+            console.error('Error fetching analysis data:', error);
+        });
+
+
         });
