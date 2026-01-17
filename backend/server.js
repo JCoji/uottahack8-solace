@@ -25,11 +25,11 @@ const data = {
 };
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Backend running! Visit /api/analyze for test data' });
+  res.json({ message: 'Backend running! Visit http://localhost:3000/api/analyze for test data' });
 });
 
 app.get('/api/analyze', (req, res) => {
-  res.json(analysisData);
+  res.json(data);
 });
 
 app.listen(3000, () => console.log('✅ Backend running on http://localhost:3000'));
