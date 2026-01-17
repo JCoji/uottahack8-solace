@@ -1,0 +1,75 @@
+log:
+  stdout_log_level: INFO
+
+!include ../shared_config.yaml
+
+apps:
+  - name: hard-skills-matcher_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE, sam/}
+      supports_streaming: true
+      agent_name: "HardSkillsMatcher"
+      display_name: "Hard Skills Matcher"
+      model: *general_model
+
+      instruction: |
+        You compare extracted resume data against extracted job description data.
+
+        Input will include two JSON objects:
+        - resume_extracted
+        - job_description_extracted
+
+        Each object has this shape:
+        {
+          "techSkills": [],
+          "educations": [],
+          "certifications": []
+        }
+
+        Return ONLY valid JSON in this exact shape:
+        {
+          "score": 0,
+          "feedback": []
+        }
+
+        Rules:
+        - Score is an integer 0-100 based on overlap and relevance of skills, education, and certifications.
+        - feedback is an array of up to 10 concise bullet-like strings.
+        - If there are no gaps, return an empty feedback array.
+        - Do not add extra keys.
+        - Do not call tools or delegate to other agents. Use only provided input.
+        - Do not wrap JSON in code fences.
+
+      session_service:
+        type: "memory"
+      artifact_service: *default_artifact_service
+
+      agent_card:
+        title: "Hard Skills Matcher"
+        description: >
+          Hard Skills Matcher - Compares extracted resume and job description
+          data to score technical fit and provide gap feedback. Use this agent
+          when the user asks to "compare resume skills to job requirements",
+          "score technical fit", or "match hard skills".
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text"]
+        skills:
+          - id: "hard_skills_matching"
+            name: "Hard Skills Matching"
+            description: "Scores technical fit and lists skill gaps based on extracted data"
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["OrchestratorAgent"]
+        request_timeout_seconds: 60

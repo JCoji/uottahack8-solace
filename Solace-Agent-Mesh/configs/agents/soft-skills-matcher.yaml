@@ -1,0 +1,65 @@
+log:
+  stdout_log_level: INFO
+
+!include ../shared_config.yaml
+
+apps:
+  - name: soft-skills-matcher_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE, sam/}
+      supports_streaming: true
+      agent_name: "SoftSkillsMatcher"
+      display_name: "Soft Skills Matcher"
+      model: *general_model
+
+      instruction: |
+        You assess soft skills fit for a candidate based on company name, company
+        description, job description, and the resume text.
+
+        Return ONLY valid JSON in this exact shape:
+        {
+          "score": 0,
+          "feedback": []
+        }
+
+        Rules:
+        - Score is an integer 0-100 based on soft skills alignment and evidence in resume.
+        - feedback is an array of up to 10 concise bullet-like strings.
+        - If there are no gaps, return an empty feedback array.
+        - Do not add extra keys.
+        - Do not call tools or delegate to other agents. Use only provided input.
+        - Do not wrap JSON in code fences.
+
+      session_service:
+        type: "memory"
+      artifact_service: *default_artifact_service
+
+      agent_card:
+        title: "Soft Skills Matcher"
+        description: >
+          Soft Skills Matcher - Assesses soft skills alignment for a role and
+          company using job description, company context, and resume text. Use
+          this agent when the user asks to "score soft skills fit", "evaluate
+          soft skills for a resume", or "compare soft skills to company values."
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text"]
+        skills:
+          - id: "soft_skills_matching"
+            name: "Soft Skills Matching"
+            description: "Scores soft skills fit and lists soft-skill gaps"
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["OrchestratorAgent"]
+        request_timeout_seconds: 60

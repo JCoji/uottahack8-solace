@@ -13,7 +13,7 @@ app = FastAPI(title="Resume Fit API")
 DEFAULT_GATEWAY_URL = "http://localhost:8000"
 DEFAULT_AGENT_NAME = "OrchestratorAgent"
 DEFAULT_POLL_INTERVAL_SECONDS = 1.0
-DEFAULT_POLL_TIMEOUT_SECONDS = 120.0
+DEFAULT_POLL_TIMEOUT_SECONDS = 300.0
 
 
 class FitScoreRequest(BaseModel):
@@ -24,9 +24,21 @@ class FitScoreRequest(BaseModel):
 
 def _build_prompt(payload: FitScoreRequest) -> str:
     return (
-        "You are a resume fit scorer. Use the following inputs:\n\n"
+        "You are the Orchestrator. Run this agent chain in order:\n"
+        "1) ResumeExtractor on the resume text.\n"
+        "2) JobDescriptionExtractor on the job description text.\n"
+        "3) HardSkillsMatcher with resume_extracted and job_description_extracted.\n"
+        "4) SoftSkillsMatcher with company name, company description, job description, and resume.\n"
+        "5) FitReranker with hard_skills and soft_skills.\n\n"
+        "Return ONLY the final FitReranker JSON:\n"
+        "{\n"
+        "  \"score\": 0,\n"
+        "  \"softSkillFeedback\": [],\n"
+        "  \"techSkillFeedback\": []\n"
+        "}\n\n"
+        "Inputs:\n\n"
         f"Company Name:\n{payload.companyName}\n\n"
-        f"Company Description:\n{payload.companyDesc}\n\n"
+        f"Job Description:\n{payload.companyDesc}\n\n"
         f"Resume:\n{payload.resume}\n"
     )
 
@@ -133,8 +145,21 @@ def _is_consolidated_payload(data: dict) -> bool:
 
 
 def _parse_text_payload(text: str) -> dict | None:
+    trimmed = _strip_json_fences(text)
     try:
-        data = json.loads(text)
+        data = json.loads(trimmed)
     except json.JSONDecodeError:
         return None
     return data if _is_consolidated_payload(data) else None
+
+
+def _strip_json_fences(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        return "\n".join(lines).strip()
+    return stripped
