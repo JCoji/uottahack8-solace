@@ -53,6 +53,14 @@ apps:
             Responses should be clear, concise, and professionally toned.
             Format responses to the user in Markdown using appropriate formatting.
 
+      # Task/event persistence for /api/v1/tasks/* endpoints
+      task_logging:
+        enabled: true
+        log_status_updates: true
+        log_artifact_events: true
+        log_file_parts: true
+        max_file_part_size_bytes: 10240
+
       # Frontend Config
       frontend_welcome_message: ${FRONTEND_WELCOME_MESSAGE, "Hello, how can I assist you?"}
       frontend_bot_name: ${FRONTEND_BOT_NAME, Solace Agent Mesh}

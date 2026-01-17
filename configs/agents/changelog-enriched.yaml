@@ -70,7 +70,7 @@ apps:
 
       session_service:
         type: ${PERSISTENCE_TYPE, memory}
-        database_url: ${CUSTOM_AGENT_DATABASE_URL,}
+        database_url: ${CUSTOM_AGENT_DATABASE_URL}
 
       artifact_service: *default_artifact_service
 

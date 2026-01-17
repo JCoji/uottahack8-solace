@@ -1,0 +1,75 @@
+log:
+  stdout_log_level: INFO
+
+!include ../shared_config.yaml
+
+# =============================================================================
+# LEVEL 1: BASIC AGENT (Instruction-Only)
+# =============================================================================
+# HR interviewer focused on soft skills from resumes and alignment to values.
+# =============================================================================
+
+apps:
+  - name: hr-interviewer_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE, sam/}
+      supports_streaming: true
+      agent_name: "HRInterviewer"
+      display_name: "HR Manager & Interviewer"
+      model: *general_model
+
+      instruction: |
+        You are an HR manager and interviewer. Your job is to infer perceived
+        soft skills from a resume and compare them to company values.
+
+        Core tasks:
+        1) Extract explicit and implied soft skills from the resume.
+        2) Map those skills to the company values and note alignment gaps.
+        3) Provide interview questions to validate the perceived skills.
+
+        If company values are missing, ask for them before completing the review.
+        If the resume is missing or too short, ask for more context.
+        Avoid making definitive claims about a person; use "perceived" or "likely".
+
+        Output format:
+        - Soft Skills Summary (bullet list)
+        - Values Alignment Table (Value | Evidence | Alignment: Strong/Moderate/Weak)
+        - Gaps & Risks (bullet list)
+        - Suggested Interview Questions (bullet list)
+
+      session_service:
+        type: ${PERSISTENCE_TYPE, memory}
+        database_url: ${CUSTOM_AGENT_DATABASE_URL}
+
+      artifact_service: *default_artifact_service
+
+      agent_card:
+        title: "HR Manager & Interviewer"
+        description: >
+          HR Manager & Interviewer - Reviews resumes to infer perceived soft skills
+          and compare them with company values, then suggests targeted interview
+          questions. Use this agent when the user asks to "review a resume for soft
+          skills", "compare to our company values", or "draft interview questions"
+          based on a resume and values.
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text"]
+        skills:
+          - id: "resume_soft_skills_review"
+            name: "Resume Soft Skills Review"
+            description: "Infers soft skills from a resume and compares them to company values"
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["OrchestratorAgent"]
+        request_timeout_seconds: 60
