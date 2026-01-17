@@ -13,7 +13,7 @@ apps:
 
     app_config:
       namespace: ${NAMESPACE, sam/}
-      supports_streaming: true
+      supports_streaming: false
       agent_name: "JobDescriptionExtractor"
       display_name: "Job Description Extractor"
       model: *general_model

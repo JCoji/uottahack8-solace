@@ -13,7 +13,7 @@ apps:
 
     app_config:
       namespace: ${NAMESPACE, sam/}
-      supports_streaming: true
+      supports_streaming: false
       agent_name: "HardSkillsMatcher"
       display_name: "Hard Skills Matcher"
       model: *general_model

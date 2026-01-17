@@ -97,14 +97,32 @@ async def fit_score(payload: FitScoreRequest) -> dict:
             events_response = await client.get(
                 f"{gateway_url}/api/v1/tasks/{task_id}/events"
             )
+            if events_response.status_code == 404:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Task not found (may have expired or be on a different gateway).",
+                )
             if events_response.status_code >= 400:
                 raise HTTPException(
                     status_code=events_response.status_code, detail=events_response.text
                 )
 
-            consolidated = _extract_consolidated_response(events_response.json())
+            events_payload = events_response.json()
+            consolidated = _extract_consolidated_response(events_payload)
             if consolidated:
                 return consolidated
+
+            task_status = _get_task_status(events_payload, task_id)
+            if task_status == "failed":
+                raise HTTPException(
+                    status_code=502,
+                    detail="Task failed without consolidated response.",
+                )
+            if task_status == "completed":
+                raise HTTPException(
+                    status_code=502,
+                    detail="Task completed without consolidated response.",
+                )
 
             await asyncio.sleep(poll_interval)
 
@@ -118,7 +136,7 @@ def _extract_consolidated_response(events_payload: dict) -> dict | None:
         for event in reversed(events):
             payload = event.get("full_payload", {})
             result = payload.get("result", {})
-            message = result.get("message")
+            message = result.get("status", {}).get("message") or result.get("message")
             if not message:
                 continue
             parts = message.get("parts", [])
@@ -133,6 +151,14 @@ def _extract_consolidated_response(events_payload: dict) -> dict | None:
                     if parsed is not None:
                         return parsed
     return None
+
+
+def _get_task_status(events_payload: dict, task_id: str) -> str | None:
+    tasks = events_payload.get("tasks", {})
+    task = tasks.get(task_id)
+    if not task:
+        return None
+    return task.get("status")
 
 
 def _is_consolidated_payload(data: dict) -> bool:
