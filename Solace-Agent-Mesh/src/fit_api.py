@@ -19,7 +19,7 @@ DEFAULT_POLL_TIMEOUT_SECONDS = 300.0
 class FitScoreRequest(BaseModel):
     resume: str
     companyName: str
-    companyDesc: str
+    jobDesc: str
 
 
 def _build_prompt(payload: FitScoreRequest) -> str:
@@ -28,7 +28,7 @@ def _build_prompt(payload: FitScoreRequest) -> str:
         "1) ResumeExtractor on the resume text.\n"
         "2) JobDescriptionExtractor on the job description text.\n"
         "3) HardSkillsMatcher with resume_extracted and job_description_extracted.\n"
-        "4) SoftSkillsMatcher with company name, company description, job description, and resume.\n"
+        "4) SoftSkillsMatcher with company name, job description, and resume.\n"
         "5) FitReranker with hard_skills and soft_skills.\n\n"
         "Return ONLY the final FitReranker JSON:\n"
         "{\n"
@@ -38,7 +38,7 @@ def _build_prompt(payload: FitScoreRequest) -> str:
         "}\n\n"
         "Inputs:\n\n"
         f"Company Name:\n{payload.companyName}\n\n"
-        f"Job Description:\n{payload.companyDesc}\n\n"
+        f"Job Description:\n{payload.jobDesc}\n\n"
         f"Resume:\n{payload.resume}\n"
     )
 

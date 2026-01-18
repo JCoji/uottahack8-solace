@@ -19,8 +19,7 @@ apps:
       model: *general_model
 
       instruction: |
-        You assess soft skills fit for a candidate based on company name, company
-        description, job description, and the resume text.
+        You assess soft skills fit for a candidate based on company name, job description, and the resume text.
 
         Return ONLY valid JSON in this exact shape:
         {

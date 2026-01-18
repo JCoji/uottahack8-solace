@@ -42,7 +42,7 @@ apps:
           1) ResumeExtractor on the resume text.
           2) JobDescriptionExtractor on the job description text.
           3) HardSkillsMatcher with resume_extracted and job_description_extracted.
-          4) SoftSkillsMatcher with company name, company description, job description, and resume.
+          4) SoftSkillsMatcher with company name, job description, and resume.
           5) FitReranker with hard_skills and soft_skills.
         - Return ONLY the final FitReranker JSON with keys: score, softSkillFeedback, techSkillFeedback.
 
