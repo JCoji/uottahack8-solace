@@ -45,7 +45,7 @@ async function createFormDataJSON() {
     };
     
     console.log('%c[Form Data JSON]', 'color: #f59e0b; font-weight: bold;', formDataJSON);
-    return formDataJSON;
+    return JSON.stringify(formDataJSON);
 }
 
 resumeInput.addEventListener('change', async function(e) {
@@ -146,3 +146,17 @@ document.getElementById('jobForm').addEventListener('submit', function(e) {
         createFormDataJSON();
 
         });
+
+
+// function downloadJSON(filename, data) {
+//     const blob = new Blob([data], { type: "application/json" });
+//     const url = URL.createObjectURL(blob);
+
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = filename;
+//     a.click();
+
+//     URL.revokeObjectURL(url);
+// }
+
