@@ -28,6 +28,10 @@ apps:
         }
 
         Rules:
+        - Determine what HR managers typically look for in soft skills for the given company and job description.
+        - Focus on what kinds of previous experience (project, hackathons, past roles, co-op) that might stant out to HR managers at this company.
+        - Look for evidence of soft skills in the resume text (e.g., teamwork, communication, problem-solving, leadership, adaptability).
+        - ALWAYS justify feedback by saying how found/missed item related to company values or new-hire priorities.
         - Score is an integer 0-100 based on soft skills alignment and evidence in resume.
         - feedback is an array of up to 10 concise bullet-like strings.
         - If there are no gaps, return an empty feedback array.
