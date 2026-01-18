@@ -154,7 +154,7 @@
                 <div class="p-8 sm:p-10 h-full flex flex-col">
                     <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
                         <i class="fa-solid fa-chart-line mr-3 text-brand-500"></i>
-                        Form Data Preview
+                        Comparison Results
                     </h2>
 
                     <!-- Default State: No Data -->
@@ -172,21 +172,21 @@
                     <div id="dataDisplayState" class="hidden flex-grow space-y-6">
                         
                         <div class="bg-white/50 p-4 rounded-xl border border-brand-100">
-                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">Company</span>
-                            <p id="previewCompany" class="text-lg font-bold text-slate-900 mt-1"></p>
+                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">Score</span>
+                            <p id="scoreResult" class="text-lg font-bold text-slate-900 mt-1">How well you match will appear here.</p>
                         </div>
 
                         <div>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Job Description Snippet</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Soft Skills</span>
                             <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <p id="previewJD"></p>
+                                <p id="softResult" class="text-lg font-bold text-slate-900 mt-1">Your matching soft skills will be shown here.</p>
                             </div>
                         </div>
 
                         <div>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extracted Resume Text</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hard Skills</span>
                             <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 resume-preview-box">
-                                <p id="previewResume" class="whitespace-pre-wrap"></p>
+                                <p id="hardResult" class="whitespace-pre-wrap">your matching hard skills will be shown here.</p>
                             </div>
                         </div>
 
@@ -198,109 +198,6 @@
 
     </div>
 
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        // Reset form to default state on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('jobForm');
-            form.reset();
-            document.getElementById('fileNameDisplay').textContent = '';
-            document.getElementById('resumeText').value = '';
-            document.getElementById('noDataState').classList.remove('hidden');
-            document.getElementById('dataDisplayState').classList.add('hidden');
-        });
-
-        const resumeInput = document.getElementById('resume');
-        const resumeText = document.getElementById('resumeText');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const submitBtn = document.getElementById('submitBtn');
-
-        let isExtracting = false;
-
-        resumeInput.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                fileNameDisplay.textContent = '';
-                return;
-            }
-
-            fileNameDisplay.textContent = file.name;
-            fileNameDisplay.classList.remove('text-red-500');
-            
-            isExtracting = true;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Reading PDF...';
-
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                try {
-                    const typedarray = new Uint8Array(event.target.result);
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    let fullText = '';
-
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const textContent = await page.getTextContent();
-                        const pageText = textContent.items.map(item => item.str).join(' ');
-                        fullText += pageText + '\n';
-                    }
-
-                    resumeText.value = fullText.trim();
-                    console.log('%c[Resume Extracted]', 'color: #3b82f6; font-weight: bold;', 'Chars:', fullText.length);
-                } catch (error) {
-                    console.error('Error extracting PDF text:', error);
-                    fileNameDisplay.textContent = 'Error reading PDF.';
-                    fileNameDisplay.classList.add('text-red-500');
-                } finally {
-                    isExtracting = false;
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Analyze Match';
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        document.getElementById('jobForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (isExtracting) return;
-
-            const company = document.getElementById('company').value;
-            const jobDescription = document.getElementById('jobDescription').value;
-            const extractedResumeText = document.getElementById('resumeText').value;
-
-            console.group('%c[Form Submission]', 'color: #2563eb; font-weight: bold;');
-            console.log('Company:', company);
-            console.log('JD length:', jobDescription.length);
-            console.log('Resume length:', extractedResumeText.length);
-            console.groupEnd();
-
-            const btn = document.getElementById('submitBtn');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                document.getElementById('noDataState').classList.add('hidden');
-                document.getElementById('dataDisplayState').classList.remove('hidden');
-
-                document.getElementById('previewCompany').textContent = company;
-                document.getElementById('previewJD').textContent = jobDescription.length > 250 
-                    ? jobDescription.substring(0, 250) + '...' 
-                    : jobDescription;
-
-                // Ensure text is set and visible
-                const previewEl = document.getElementById('previewResume');
-                previewEl.textContent = extractedResumeText || "No text could be extracted.";
-                
-                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Results Loaded';
-                setTimeout(() => {
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
-                }, 2000);
-            }, 600);
-        });
-    </script>
+    <script src="./back.js"></script>
 </body>
 </html>
