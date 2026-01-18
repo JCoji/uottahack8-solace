@@ -18,11 +18,28 @@ const submitBtn = document.getElementById('submitBtn');
 
 let isExtracting = false;
 
-// New function to fetch data from Node.js server and log it
+// New function to fetch data from FastAPI SAM connection and log it
 async function fetchAnalysisData() {
+    const company = document.getElementById('company').value;
+    const jobDescription = document.getElementById('jobDescription').value;
+    const resumeText = document.getElementById('resumeText').value;
+    
+    const payload = {
+        resume: resumeText,
+        companyName: company,
+        jobDesc: jobDescription
+    };
+    
     try {
-        console.log('%c[Fetching Analysis Data]', 'color: #2563eb; font-weight: bold;');
-        const response = await fetch('http://localhost:3000/api/analyze');
+        console.log('%c[Fetching Analysis Data from SAM]', 'color: #2563eb; font-weight: bold;');
+        console.log('%c[Payload]', 'color: #f59e0b; font-weight: bold;', payload);
+        const response = await fetch('http://localhost:8081/api/v1/fit-score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
         const data = await response.json();
         console.log('%c[API Response Data]', 'color: #10b981; font-weight: bold;', data);
         return data;
@@ -32,21 +49,7 @@ async function fetchAnalysisData() {
     }
 }
 
-// New function to convert form data into JSON
-async function createFormDataJSON() {
-    const company = document.getElementById('company').value;
-    const jobDescription = document.getElementById('jobDescription').value;
-    const resumeText = document.getElementById('resumeText').value;
-    
-    const formDataJSON = {
-        company: company,
-        jobDescription: jobDescription,
-        resumeText: resumeText,
-    };
-    
-    console.log('%c[Form Data JSON]', 'color: #f59e0b; font-weight: bold;', formDataJSON);
-    return formDataJSON;
-}
+
 
 resumeInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
@@ -137,12 +140,10 @@ document.getElementById('jobForm').addEventListener('submit', function(e) {
         
         fetchAnalysisData().then(data => {
             document.getElementById('scoreResult').textContent = data.score;
-            document.getElementById('softResult').innerHTML = data.softSkillFeedback.map(item => `<li>${item}</li>`).join('');
-            document.getElementById('hardResult').innerHTML = data.hardSkillFeedback.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('softResult').innerHTML = (data.softSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
+            document.getElementById('hardResult').innerHTML = (data.techSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
         }).catch(error => {
             console.error('Error fetching analysis data:', error);
         });
-
-        createFormDataJSON();
 
         });

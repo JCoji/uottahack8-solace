@@ -1,14 +1,26 @@
 import asyncio
 import json
+import logging
 import os
 import time
 import uuid
 
 import httpx
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+logging.basicConfig(encoding='utf-8')
+
 app = FastAPI(title="Resume Fit API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 DEFAULT_GATEWAY_URL = "http://localhost:8000"
 DEFAULT_AGENT_NAME = "OrchestratorAgent"
