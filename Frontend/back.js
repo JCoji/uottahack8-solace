@@ -1,89 +1,136 @@
 
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    //test
-        // Reset form to default state on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('jobForm');
-            form.reset();
-            document.getElementById('fileNameDisplay').textContent = '';
-            document.getElementById('resumeText').value = '';
-            document.getElementById('noDataState').classList.remove('hidden');
-            document.getElementById('dataDisplayState').classList.add('hidden');
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+//test
+// Reset form to default state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('jobForm');
+    form.reset();
+    document.getElementById('fileNameDisplay').textContent = '';
+    document.getElementById('resumeText').value = '';
+    document.getElementById('noDataState').classList.remove('hidden');
+    document.getElementById('dataDisplayState').classList.add('hidden');
+});
+
+const resumeInput = document.getElementById('resume');
+const resumeText = document.getElementById('resumeText');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+const submitBtn = document.getElementById('submitBtn');
+
+let isExtracting = false;
+
+// New function to fetch data from FastAPI SAM connection and log it
+async function fetchAnalysisData() {
+    const company = document.getElementById('company').value;
+    const jobDescription = document.getElementById('jobDescription').value;
+    const resumeText = document.getElementById('resumeText').value;
+    
+    const payload = {
+        resume: resumeText,
+        companyName: company,
+        jobDesc: jobDescription
+    };
+    
+    try {
+        console.log('%c[Fetching Analysis Data from SAM]', 'color: #2563eb; font-weight: bold;');
+        console.log('%c[Payload]', 'color: #f59e0b; font-weight: bold;', payload);
+        const response = await fetch('http://localhost:8081/api/v1/fit-score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
         });
+        const data = await response.json();
+        console.log('%c[API Response Data]', 'color: #10b981; font-weight: bold;', data);
+        return data;
+    } catch (error) {
+        console.error('%c[API Error]', 'color: #ef4444; font-weight: bold;', error);
+        throw error;
+    }
+}
 
-        const resumeInput = document.getElementById('resume');
-        const resumeText = document.getElementById('resumeText');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const submitBtn = document.getElementById('submitBtn');
+// New function to convert form data into JSON
+async function createFormDataJSON() {
+    const company = document.getElementById('company').value;
+    const jobDescription = document.getElementById('jobDescription').value;
+    const resumeText = document.getElementById('resumeText').value;
+    
+    const formDataJSON = {
+        company: company,
+        jobDescription: jobDescription,
+        resumeText: resumeText,
+    };
+    
+    console.log('%c[Form Data JSON]', 'color: #f59e0b; font-weight: bold;', formDataJSON);
+    return JSON.stringify(formDataJSON);
+}
 
-        let isExtracting = false;
+resumeInput.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) {
+        fileNameDisplay.textContent = '';
+        return;
+    }
 
-        resumeInput.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                fileNameDisplay.textContent = '';
-                return;
+    fileNameDisplay.textContent = file.name;
+    fileNameDisplay.classList.remove('text-red-500');
+    
+    isExtracting = true;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Reading PDF...';
+
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+        try {
+            const typedarray = new Uint8Array(event.target.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            let fullText = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\n';
             }
 
-            fileNameDisplay.textContent = file.name;
-            fileNameDisplay.classList.remove('text-red-500');
-            
-            isExtracting = true;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Reading PDF...';
+            resumeText.value = fullText.trim();
+            console.log('%c[Resume Extracted]', 'color: #3b82f6; font-weight: bold;', 'Chars:', fullText.length);
+        } catch (error) {
+            console.error('Error extracting PDF text:', error);
+            fileNameDisplay.textContent = 'Error reading PDF.';
+            fileNameDisplay.classList.add('text-red-500');
+        } finally {
+            isExtracting = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Analyze Match';
+        }
+    };
+    reader.readAsArrayBuffer(file);
+});
 
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                try {
-                    const typedarray = new Uint8Array(event.target.result);
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    let fullText = '';
+document.getElementById('jobForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (isExtracting) return;
 
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const textContent = await page.getTextContent();
-                        const pageText = textContent.items.map(item => item.str).join(' ');
-                        fullText += pageText + '\n';
-                    }
+    const company = document.getElementById('company').value;
+    const jobDescription = document.getElementById('jobDescription').value;
+    const extractedResumeText = document.getElementById('resumeText').value;
 
-                    resumeText.value = fullText.trim();
-                    console.log('%c[Resume Extracted]', 'color: #3b82f6; font-weight: bold;', 'Chars:', fullText.length);
-                } catch (error) {
-                    console.error('Error extracting PDF text:', error);
-                    fileNameDisplay.textContent = 'Error reading PDF.';
-                    fileNameDisplay.classList.add('text-red-500');
-                } finally {
-                    isExtracting = false;
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Analyze Match';
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
+    console.group('%c[Form Submission]', 'color: #2563eb; font-weight: bold;');
+    console.log('Company:', company);
+    console.log('JD length:', jobDescription.length);
+    console.log('Resume length:', extractedResumeText.length);
+    console.groupEnd();
 
-        document.getElementById('jobForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (isExtracting) return;
+    const btn = document.getElementById('submitBtn');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...';
+    btn.disabled = true;
 
-            const company = document.getElementById('company').value;
-            const jobDescription = document.getElementById('jobDescription').value;
-            const extractedResumeText = document.getElementById('resumeText').value;
-
-            console.group('%c[Form Submission]', 'color: #2563eb; font-weight: bold;');
-            console.log('Company:', company);
-            console.log('JD length:', jobDescription.length);
-            console.log('Resume length:', extractedResumeText.length);
-            console.groupEnd();
-
-            const btn = document.getElementById('submitBtn');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                document.getElementById('noDataState').classList.add('hidden');
-                document.getElementById('dataDisplayState').classList.remove('hidden');
+    setTimeout(() => {
+        document.getElementById('noDataState').classList.add('hidden');
+        document.getElementById('dataDisplayState').classList.remove('hidden');
 
                 // when ready ue these to display results
                 // document.getElementById('scoreResult').textContent = company;
@@ -104,4 +151,27 @@
                     btn.disabled = false;
                 }, 2000);
             }, 600);
+        
+        fetchAnalysisData().then(data => {
+            document.getElementById('scoreResult').textContent = data.score;
+            document.getElementById('softResult').innerHTML = (data.softSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
+            document.getElementById('hardResult').innerHTML = (data.techSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
+        }).catch(error => {
+            console.error('Error fetching analysis data:', error);
         });
+
+        });
+
+
+// function downloadJSON(filename, data) {
+//     const blob = new Blob([data], { type: "application/json" });
+//     const url = URL.createObjectURL(blob);
+
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = filename;
+//     a.click();
+
+//     URL.revokeObjectURL(url);
+// }
+

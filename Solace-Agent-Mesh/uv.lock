@@ -2633,12 +2633,14 @@ source = { virtual = "." }
 dependencies = [
     { name = "pygithub" },
     { name = "solace-agent-mesh" },
+    { name = "uvicorn" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "pygithub", specifier = "==2.8.1" },
     { name = "solace-agent-mesh", specifier = "==1.13.3" },
+    { name = "uvicorn", specifier = ">=0.37.0" },
 ]
 
 [[package]]

@@ -36,6 +36,16 @@ apps:
         - You must then review the list of artifacts and return the ones that are important for the user by using the `signal_artifact_for_return` tool.
         - Provide regular progress updates using `status_update` embed directives, especially before initiating any tool call.
 
+        Resume fit workflow (MUST FOLLOW EXACTLY for fit requests):
+        - Do NOT create artifacts for input data. Use the provided request text directly.
+        - Always run this agent chain in order, passing outputs between agents:
+          1) ResumeExtractor on the resume text.
+          2) JobDescriptionExtractor on the job description text.
+          3) HardSkillsMatcher with resume_extracted and job_description_extracted.
+          4) SoftSkillsMatcher with company name, job description, and resume.
+          5) FitReranker with hard_skills and soft_skills.
+        - Return ONLY the final FitReranker JSON with keys: score, softSkillFeedback, techSkillFeedback.
+
       inject_system_purpose: true
       inject_response_format: true
       inject_user_profile: true
