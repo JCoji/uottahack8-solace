@@ -182,24 +182,34 @@
                     <!-- Data Display State -->
                     <div id="dataDisplayState" class="hidden flex-grow space-y-6">
                         
+                        <!-- Score Section with Bar -->
                         <div class="bg-white/50 p-4 rounded-xl border border-brand-100">
-                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">Score</span>
-                            <p id="scoreResult" class="text-lg font-bold text-slate-900 mt-1">How well you match will appear here.</p>
+                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">Match Score</span>
+                            
+                            <div class="mt-2">
+                                <div class="flex items-baseline gap-1">
+                                    <p id="scoreResult" class="text-3xl font-bold text-slate-900">0</p>
+                                    <span class="text-sm text-slate-500 font-medium">/ 100</span>
+                                </div>
+                                
+                                <!-- Progress Bar Background -->
+                                <div class="w-full bg-slate-200 rounded-full h-3 mt-2 overflow-hidden">
+                                    <!-- Progress Bar Fill -->
+                                    <div id="scoreBar" class="bg-brand-600 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Soft Skills</span>
                             <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <!-- <p id="softResult" class="text-lg font-bold text-slate-900 mt-1">Your matching soft skills will be shown here.</p> -->
                                 <p id="softResult" class="whitespace-pre-wrap">Your matching soft skills will be shown here.</p>
                             </div>
                         </div>
 
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hard Skills</span>
-                            <!-- <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 resume-preview-box"> -->
                             <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <!-- <p id="hardResult" class="text-lg font-bold text-slate-900 mt-1">your matching hard skills will be shown here.</p> -->
                                 <p id="hardResult" class="whitespace-pre-wrap">your matching hard skills will be shown here.</p>
                             </div>
                         </div>
