@@ -1,4 +1,3 @@
-
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 //test
 // Reset form to default state on page load
@@ -8,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fileNameDisplay').textContent = '';
     document.getElementById('resumeText').value = '';
     document.getElementById('noDataState').classList.remove('hidden');
+    document.getElementById('loadingState').classList.add('hidden');
     document.getElementById('dataDisplayState').classList.add('hidden');
 });
 
@@ -125,53 +125,42 @@ document.getElementById('jobForm').addEventListener('submit', function(e) {
 
     const btn = document.getElementById('submitBtn');
     const originalContent = btn.innerHTML;
+    
+    // Update Button State
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...';
     btn.disabled = true;
 
-    setTimeout(() => {
-        document.getElementById('noDataState').classList.add('hidden');
+    // Update Right Panel State (Show Loading)
+    document.getElementById('noDataState').classList.add('hidden');
+    document.getElementById('dataDisplayState').classList.add('hidden');
+    document.getElementById('loadingState').classList.remove('hidden');
+
+    fetchAnalysisData().then(data => {
+        // Success: Hide Loading, Show Data
+        document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('dataDisplayState').classList.remove('hidden');
 
-                // when ready ue these to display results
-                // document.getElementById('scoreResult').textContent = company;
-                // document.getElementById('softResult').textContent = jobDescription;
-                // document.getElementById('hardResult').textContent = extractedResumeText;
-
-                // document.getElementById('softResult').textContent = jobDescription.length > 250 
-                //     ? jobDescription.substring(0, 250) + '...' 
-                //     : jobDescription;
-
-                // Ensure text is set and visible
-                // const previewEl = document.getElementById('comparisonSummary');
-                // previewEl.textContent = extractedResumeText || "No text could be extracted.";
-                
-                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Results Loaded';
-                setTimeout(() => {
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
-                }, 2000);
-            }, 600);
+        document.getElementById('scoreResult').textContent = data.score;
+        document.getElementById('softResult').innerHTML = (data.softSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
+        document.getElementById('hardResult').innerHTML = (data.techSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
         
-        fetchAnalysisData().then(data => {
-            document.getElementById('scoreResult').textContent = data.score;
-            document.getElementById('softResult').innerHTML = (data.softSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
-            document.getElementById('hardResult').innerHTML = (data.techSkillFeedback || []).map(item => `<li>${item}</li>`).join('');
-        }).catch(error => {
-            console.error('Error fetching analysis data:', error);
-        });
+        btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Results Loaded';
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }, 2000);
 
-        });
-
-
-// function downloadJSON(filename, data) {
-//     const blob = new Blob([data], { type: "application/json" });
-//     const url = URL.createObjectURL(blob);
-
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = filename;
-//     a.click();
-
-//     URL.revokeObjectURL(url);
-// }
-
+    }).catch(error => {
+        console.error('Error fetching analysis data:', error);
+        
+        // Error: Hide Loading, Show Error on Button (or revert to no data)
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('noDataState').classList.remove('hidden');
+        
+        btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Error';
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }, 3000);
+    });
+});
