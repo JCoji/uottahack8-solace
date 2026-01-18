@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Rater</title>
+    <title>uGotta Job</title>
     <!-- Tailwind CSS for "super pretty awesome sauce" styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -70,7 +70,7 @@
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-600 text-white mb-4 shadow-lg shadow-brand-500/30">
                 <i class="fa-solid fa-briefcase text-2xl"></i>
             </div>
-            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">Job Match Rater</h1>
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">uGottaJob</h1>
             <p class="text-lg text-slate-600">Analyze how well your resume fits the role.</p>
         </div>
 
@@ -168,27 +168,49 @@
                         </div>
                     </div>
 
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden flex-grow flex flex-col items-center justify-center text-center py-20">
+                        <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center text-brand-500 mb-4 animate-pulse">
+                            <i class="fa-solid fa-circle-notch fa-spin text-4xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-slate-800 font-bold text-lg animate-pulse">Analyzing...</p>
+                            <p class="text-slate-500 text-sm">Crunching the numbers on your resume.</p>
+                        </div>
+                    </div>
+
                     <!-- Data Display State -->
                     <div id="dataDisplayState" class="hidden flex-grow space-y-6">
                         
+                        <!-- Score Section with Bar -->
                         <div class="bg-white/50 p-4 rounded-xl border border-brand-100">
-                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">Score</span>
-                            <p id="scoreResult" class="text-lg font-bold text-slate-900 mt-1">How well you match will appear here.</p>
+                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">Match Score</span>
+                            
+                            <div class="mt-2">
+                                <div class="flex items-baseline gap-1">
+                                    <p id="scoreResult" class="text-3xl font-bold text-slate-900">0</p>
+                                    <span class="text-sm text-slate-500 font-medium">/ 100</span>
+                                </div>
+                                
+                                <!-- Progress Bar Background -->
+                                <div class="w-full bg-slate-200 rounded-full h-3 mt-2 overflow-hidden">
+                                    <!-- Progress Bar Fill -->
+                                    <div id="scoreBar" class="bg-brand-600 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Soft Skills</span>
                             <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <p id="softResult" class="text-lg font-bold text-slate-900 mt-1">Your matching soft skills will be shown here.</p>
+                                <p id="softResult" class="whitespace-pre-wrap">Your matching soft skills will be shown here.</p>
                             </div>
                         </div>
 
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hard Skills</span>
-                            <!-- <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 resume-preview-box"> -->
                             <div class="mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <p id="hardResult" class="text-lg font-bold text-slate-900 mt-1">your matching hard skills will be shown here.</p>
-                                <!-- <p id="hardResult" class="whitespace-pre-wrap">your matching hard skills will be shown here.</p> -->
+                                <p id="hardResult" class="whitespace-pre-wrap">your matching hard skills will be shown here.</p>
                             </div>
                         </div>
 
