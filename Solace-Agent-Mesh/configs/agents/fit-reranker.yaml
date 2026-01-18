@@ -1,0 +1,68 @@
+log:
+  stdout_log_level: INFO
+
+!include ../shared_config.yaml
+
+apps:
+  - name: fit-reranker_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE, sam/}
+      supports_streaming: false
+      agent_name: "FitReranker"
+      display_name: "Fit Reranker"
+      model: *general_model
+
+      instruction: |
+        You combine hard skills and soft skills results into a final response.
+
+        Input includes:
+        - hard_skills: {"score": 0, "feedback": []}
+        - soft_skills: {"score": 0, "feedback": []}
+
+        Return ONLY valid JSON in this exact shape:
+        {
+          "score": 0,
+          "softSkillFeedback": [],
+          "techSkillFeedback": []
+        }
+
+        Rules:
+        - score is an integer 0-100.
+        - softSkillFeedback comes from soft_skills.feedback.
+        - techSkillFeedback comes from hard_skills.feedback.
+        - Do not add extra keys.
+        - Do not call tools or delegate to other agents. Use only provided input.
+        - Do not wrap JSON in code fences.
+
+      session_service:
+        type: "memory"
+      artifact_service: *default_artifact_service
+
+      agent_card:
+        title: "Fit Reranker"
+        description: >
+          Fit Reranker - Combines hard and soft skills scores into a final fit
+          score and structured feedback. Use this agent when you have both
+          hard_skills and soft_skills results and need a consolidated response.
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text"]
+        skills:
+          - id: "fit_reranking"
+            name: "Fit Reranking"
+            description: "Combines hard and soft skills results into final score"
+
+      agent_card_publishing:
+        interval_seconds: 10
+
+      agent_discovery:
+        enabled: true
+
+      inter_agent_communication:
+        allow_list: ["OrchestratorAgent"]
+        request_timeout_seconds: 60
