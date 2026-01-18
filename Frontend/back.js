@@ -49,7 +49,21 @@ async function fetchAnalysisData() {
     }
 }
 
-
+// New function to convert form data into JSON
+async function createFormDataJSON() {
+    const company = document.getElementById('company').value;
+    const jobDescription = document.getElementById('jobDescription').value;
+    const resumeText = document.getElementById('resumeText').value;
+    
+    const formDataJSON = {
+        company: company,
+        jobDescription: jobDescription,
+        resumeText: resumeText,
+    };
+    
+    console.log('%c[Form Data JSON]', 'color: #f59e0b; font-weight: bold;', formDataJSON);
+    return JSON.stringify(formDataJSON);
+}
 
 resumeInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
@@ -147,3 +161,17 @@ document.getElementById('jobForm').addEventListener('submit', function(e) {
         });
 
         });
+
+
+// function downloadJSON(filename, data) {
+//     const blob = new Blob([data], { type: "application/json" });
+//     const url = URL.createObjectURL(blob);
+
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = filename;
+//     a.click();
+
+//     URL.revokeObjectURL(url);
+// }
+
